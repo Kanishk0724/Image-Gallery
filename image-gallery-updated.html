@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery by Kanishk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .controls {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 250px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gallery-item {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .gallery-info {
+            padding: 1rem;
+        }
+
+        .gallery-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+
+        .gallery-date {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        .gallery-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem 1rem;
+        }
+
+        .action-btn {
+            background-color: transparent;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            color: #e74c3c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-img {
+            max-width: 100%;
+            max-height: 90vh;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+
+        .no-images {
+            text-align: center;
+            padding: 3rem 0;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+
+        .creator-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-section {
+                width: 100%;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Image Gallery</h1>
+        <p>Store and manage your photos easily</p>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <div class="upload-section">
+                <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+                <label for="fileInput" class="upload-btn">Upload Images</label>
+                <p id="upload-status"></p>
+            </div>
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search images...">
+            </div>
+        </div>
+
+        <div id="gallery" class="gallery">
+            <!-- Images will be added here dynamically -->
+            <div class="no-images" id="no-images">
+                <h3>No images yet</h3>
+                <p>Upload some images to get started!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="creator-info">
+        <p>Designed and developed by Kanishk</p>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <div class="modal-content">
+            <img src="" alt="Enlarged image" id="modalImg" class="modal-img">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const gallery = document.getElementById('gallery');
+            const fileInput = document.getElementById('fileInput');
+            const uploadStatus = document.getElementById('upload-status');
+            const searchInput = document.getElementById('searchInput');
+            const noImagesMessage = document.getElementById('no-images');
+            const imageModal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            const closeModal = document.getElementById('closeModal');
+            
+            // In-memory storage for images instead of localStorage
+            let imagesArray = [];
+
+            // Event listeners
+            fileInput.addEventListener('change', handleFileUpload);
+            searchInput.addEventListener('input', filterImages);
+            closeModal.addEventListener('click', () => {
+                imageModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside the image
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === imageModal) {
+                    imageModal.style.display = 'none';
+                }
+            });
+
+            // Handle file upload
+            function handleFileUpload(e) {
+                const files = e.target.files;
+                
+                if (files.length === 0) return;
+                
+                uploadStatus.textContent = `Uploading ${files.length} image(s)...`;
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // Only process image files
+                    if (!file.type.startsWith('image/')) {
+                        continue;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        const imageData = {
+                            id: generateId(),
+                            name: file.name,
+                            src: event.target.result,
+                            date: new Date().toISOString(),
+                        };
+                        
+                        // Save to in-memory array instead of localStorage
+                        saveImage(imageData);
+                        addImageToGallery(imageData);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+                
+                // Clear file input for future uploads
+                fileInput.value = '';
+                setTimeout(() => {
+                    uploadStatus.textContent = '';
+                }, 3000);
+            }
+
+            // Save image to in-memory array
+            function saveImage(imageData) {
+                imagesArray.push(imageData);
+                updateNoImagesDisplay();
+            }
+
+            // Add image to gallery DOM
+            function addImageToGallery(imageData) {
+                // Update visibility of "no images" message
+                updateNoImagesDisplay();
+                
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.dataset.id = imageData.id;
+                
+                const imgDate = new Date(imageData.date);
+                const formattedDate = imgDate.toLocaleDateString() + ' ' + imgDate.toLocaleTimeString();
+                
+                item.innerHTML = `
+                    <img src="${imageData.src}" alt="${imageData.name}" class="gallery-img">
+                    <div class="gallery-info">
+                        <h3 class="gallery-title">${imageData.name}</h3>
+                        <p class="gallery-date">${formattedDate}</p>
+                    </div>
+                    <div class="gallery-actions">
+                        <button class="action-btn download-btn">Download</button>
+                        <button class="action-btn delete-btn">Delete</button>
+                    </div>
+                `;
+                
+                // Add event listeners to the new item
+                const img = item.querySelector('.gallery-img');
+                img.addEventListener('click', () => openModal(imageData.src));
+                
+                const deleteBtn = item.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', () => deleteImage(imageData.id));
+                
+                const downloadBtn = item.querySelector('.download-btn');
+                downloadBtn.addEventListener('click', () => downloadImage(imageData));
+                
+                gallery.appendChild(item);
+            }
+
+            // Delete image
+            function deleteImage(id) {
+                // Remove from in-memory array
+                imagesArray = imagesArray.filter(img => img.id !== id);
+                
+                // Remove from DOM
+                const itemToRemove = gallery.querySelector(`.gallery-item[data-id="${id}"]`);
+                if (itemToRemove) {
+                    gallery.removeChild(itemToRemove);
+                }
+                
+                // Show "no images" message if no images left
+                updateNoImagesDisplay();
+            }
+
+            // Download image
+            function downloadImage(imageData) {
+                const a = document.createElement('a');
+                a.href = imageData.src;
+                a.download = imageData.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            // Open modal with enlarged image
+            function openModal(src) {
+                modalImg.src = src;
+                imageModal.style.display = 'flex';
+            }
+
+            // Filter images based on search input
+            function filterImages() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const items = gallery.querySelectorAll('.gallery-item');
+                let visibleCount = 0;
+                
+                items.forEach(item => {
+                    const title = item.querySelector('.gallery-title').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm)) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Check if any images are visible
+                if (visibleCount === 0 && imagesArray.length > 0) {
+                    noImagesMessage.innerHTML = '<h3>No matching images found</h3>';
+                    noImagesMessage.style.display = 'block';
+                } else if (imagesArray.length > 0) {
+                    noImagesMessage.style.display = 'none';
+                }
+            }
+
+            // Update the display of the "no images" message
+            function updateNoImagesDisplay() {
+                if (imagesArray.length > 0) {
+                    noImagesMessage.style.display = 'none';
+                } else {
+                    noImagesMessage.innerHTML = '<h3>No images yet</h3><p>Upload some images to get started!</p>';
+                    noImagesMessage.style.display = 'block';
+                }
+            }
+
+            // Generate a unique ID for each image
+            function generateId() {
+                return 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            // Add some sample images if you want to test
+            /*
+            const sampleImageData = {
+                id: generateId(),
+                name: 'Sample Image',
+                src: '/api/placeholder/400/300',
+                date: new Date().toISOString()
+            };
+            saveImage(sampleImageData);
+            addImageToGallery(sampleImageData);
+            */
+        });
+    </script>
+</body>
+</html>
